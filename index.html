@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>市長請決定：全城大停電！</title>
+    <style>
+        :root {
+            --primary-color: #FFD700;
+            --danger-color: #FF4500;
+            --info-color: #1E90FF;
+            --success-color: #2E7D32;
+            --bg-color: #E0F2F1;
+        }
+
+        body {
+            font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+            background-color: var(--bg-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            color: #222;
+            font-weight: 700;
+        }
+
+        #game-container {
+            width: 92%;
+            max-width: 700px;
+            background: white;
+            border: 6px solid #333;
+            border-radius: 35px;
+            padding: 30px;
+            box-shadow: 12px 12px 0px #444;
+            text-align: center;
+        }
+
+        h1 { font-size: 2.8rem; font-weight: 900; margin-bottom: 20px; color: #000; letter-spacing: 1px; }
+        h2 { font-size: 2rem; font-weight: 900; color: var(--danger-color); margin: 0; }
+        p { font-size: 1.5rem; line-height: 1.7; margin-bottom: 15px; font-weight: 700; }
+
+        .page { display: none; }
+        .active { display: block; animation: zoomIn 0.3s ease; }
+        @keyframes zoomIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        .status-bar {
+            background: #222;
+            color: #FFD700;
+            border-radius: 50px;
+            padding: 15px;
+            margin-bottom: 25px;
+            font-size: 1.8rem;
+            font-weight: 900;
+            border: 4px solid #444;
+        }
+
+        .btn-main {
+            background-color: var(--primary-color);
+            border: 5px solid #222;
+            padding: 18px 45px;
+            font-size: 1.8rem;
+            font-weight: 900;
+            border-radius: 25px;
+            cursor: pointer;
+            box-shadow: 0 6px 0 #666;
+            transition: 0.1s;
+            margin-top: 15px;
+        }
+        .btn-main:active { transform: translateY(4px); box-shadow: 0 2px 0 #666; }
+
+        .choice-list { display: flex; flex-direction: column; gap: 18px; }
+        .choice-btn {
+            background: #fff;
+            border: 4px solid #333;
+            padding: 22px;
+            border-radius: 22px;
+            cursor: pointer;
+            text-align: left;
+            transition: 0.2s;
+        }
+        .choice-btn:hover { background: #FFF9C4; border-color: var(--info-color); transform: scale(1.01); }
+        .choice-title { font-size: 1.8rem; font-weight: 900; display: block; margin-bottom: 8px; color: #000; }
+        .choice-desc { font-size: 1.3rem; color: #444; display: block; font-weight: 700; }
+        .choice-cost { font-size: 1.2rem; color: var(--danger-color); font-weight: 900; margin-top: 5px; display: block; }
+
+        .alert-box {
+            background: #FFF5F5;
+            border: 5px solid var(--danger-color);
+            border-radius: 22px;
+            padding: 22px;
+            margin-bottom: 25px;
+            text-align: left;
+        }
+
+        .result-item {
+            background: #E3F2FD;
+            padding: 20px;
+            border-radius: 18px;
+            margin-bottom: 15px;
+            text-align: left;
+            font-size: 1.4rem;
+            border-left: 10px solid var(--info-color);
+            font-weight: 700;
+        }
+        .impact-text { color: #555; font-size: 1.2rem; margin-top: 8px; display: block; font-style: italic; border-top: 1px solid #ccc; padding-top: 5px; }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <div id="intro-page" class="page active">
+        <h1>⚡ 市長請決定：<br>全城大停電！</h1>
+        <div style="background: #FFFDE7; padding: 25px; border-radius: 22px; border: 4px dashed #FBC02D; text-align: left;">
+            <p><strong>親愛的市長：</strong></p>
+            <p>下午 14:00 強大雷雨擊中電網！全城大停電，交通與民生陷入混亂。請在電力點數耗盡前，做出最重要的決定！</p>
+        </div>
+        <p style="font-weight: 900; color: var(--danger-color); margin-top: 20px; font-size: 1.6rem;">💡 記住：任何決定都有好處與代價！</p>
+        <button class="btn-main" onclick="startGame()">開啟遊戲 ➔</button>
+    </div>
+
+    <div id="game-page" class="page">
+        <div class="status-bar">
+            <span>⚡ 剩餘電力: <span id="energy-val">100</span> %</span>
+        </div>
+        <div id="scenario-area">
+            <div class="alert-box">
+                <h2 id="step-title">🚨 緊急報告！</h2>
+                <p id="step-desc" style="font-size: 1.6rem; margin-top:10px;"></p>
+            </div>
+            <div id="choice-container" class="choice-list"></div>
+        </div>
+    </div>
+
+    <div id="result-page" class="page">
+        <h1>📊 市長決策分析報告</h1>
+        <div id="feedback-list"></div>
+        <div style="background: #FFF9C4; border: 4px solid #FBC02D; padding: 20px; border-radius: 20px; text-align: left; margin-bottom: 20px;">
+            <p style="color: #000; font-size: 1.4rem; margin-bottom: 5px;"><strong>💡 市長課後心得：</strong></p>
+            <p style="color: #444; font-size: 1.3rem;">身為市長，每一次的資源分配，都可能讓一部分居民感到幸福，也可能讓另一部分居民面臨困難。<strong>不論你的選擇是什麼，身為決策者，一定要深思熟慮且謹慎對待每一份權力。</strong></p>
+        </div>
+        <button class="btn-main" onclick="location.reload()">重新挑戰 ↺</button>
+    </div>
+</div>
+
+<script>
+    let energy = 100;
+    let history = [];
+    let currentStepIndex = 0;
+    let selectedScenarios = [];
+
+    const allScenarios = [
+        { title: "醫院與供水", desc: "醫院發電機快沒油了，病房很黑暗！但水廠也停擺，全城高樓層開始斷水，怎麼辦？", choices: [{ text: "優先供電醫院", impact: "守住了病患的生命線，但全城居民下午可能面臨無水洗澡的困境。", cost: 50 }, { text: "恢復自來水廠", impact: "居民生活用水恢復正常，但醫院必須冒險進行手動緊急救援。", cost: 35 }] },
+        { title: "交通與手電筒", desc: "馬路號誌全停，救護車被塞在路口。同時，賣場民眾搶購手電筒，場面混亂！", choices: [{ text: "修復號誌系統", impact: "救護車順利通行救人，但賣場因擁擠發生了零星推擠受傷。", cost: 30 }, { text: "加派警力維持賣場", impact: "保護了民眾購物秩序，但市區交通大打結，救護車被困在路中。", cost: 20 }] },
+        { title: "廣播與路燈", desc: "天色漸暗，廣播電台可以發布防災資訊，或者搶修路燈防止夜晚發生意外。", choices: [{ text: "啟動廣播公告", impact: "居民得知正確訊息不再驚慌，但夜晚的街道依然漆黑，路況危險。", cost: 20 }, { text: "修復街道燈光", impact: "照亮了居民回家的路，但許多人因收不到消息而感到焦慮不安。", cost: 20 }] },
+        { title: "受困與污染", desc: "多處電梯受困需要救援。同時，焚化廠廢氣處理系統停擺，惡臭可能擴散，怎麼辦？", choices: [{ text: "優先電梯救援", impact: "順利救出受困民眾，但附近的居民被迫忍受惡臭與空氣污染。", cost: 40 }, { text: "啟動環保設施", impact: "守護了家鄉的空氣，但受困電梯的人需要忍受更久的黑暗與悶熱。", cost: 30 }] },
+        { title: "長輩照顧挑戰", desc: "安養中心冷氣停擺，長輩中暑風險高。同時，社區抽水馬桶無法沖水，衛生堪慮。", choices: [{ text: "供電安養中心", impact: "長輩們感到涼爽與舒適，但社區大樓因為缺水而傳出陣陣異味。", cost: 35 }, { text: "恢復抽水系統", sub: "解決居住環境衛生。", impact: "環境恢復整潔，但安養中心的長輩因悶熱出現身體不適。", cost: 25 }] },
+        { title: "校園放學危機", desc: "下午放學時間到了，電子校門無法開啟。同時，手機基地台停電，家長聯絡不到小孩。", choices: [{ text: "優先供電校園門禁", impact: "學生順利走出校門放學，但校門口擠滿了聯絡不到人的焦慮家長。", cost: 25 }, { text: "修復基地台通訊", impact: "家長與小孩順利通話安了心，但校門口因電子鎖失效造成出入大塞車。", cost: 25 }] },
+        { title: "捷運隧道安全", desc: "下午尖峰時段，捷運卡在隧道內，旅客需要疏散。同時，鐵路平交道柵欄壞了！", choices: [{ text: "修復平交道安全", impact: "防止了嚴重的鐵道碰撞事故，但受困捷運隧道的人感到極度不安。", cost: 45 }, { text: "疏散捷運乘客", impact: "數百名旅客獲救，但鐵路平交道附近發生了嚴重的交通碰撞。", cost: 35 }] },
+        { title: "警局與食材", desc: "派出所報案系統斷線，無法接聽電話。同時，超市冷凍庫停電，晚餐食材快壞了。", choices: [{ text: "修復警局系統", impact: "社區安全防護恢復，但超市被迫丟棄大量腐壞食物，造成資源浪費。", cost: 30 }, { text: "供電超市冷凍庫", impact: "保存了珍貴的食物資源，但警局在處理突發竊案時反應慢了一步。", cost: 15 }] },
+        { title: "動物與積水", desc: "雷雨導致動物園電動門失效。同時，低窪地下道抽水機停擺，路面快淹水了！", choices: [{ text: "供電動物園安全門", impact: "確保了兇猛野獸不會脫逃，但數輛汽車因強行通過淹水地下道而熄火。", cost: 40 }, { text: "啟動抽水機設施", impact: "道路恢復暢通，但動物園工作人員必須守夜防止門縫被推開。", cost: 25 }] },
+        { title: "氣體監測系統", desc: "地下街瓦斯偵測器失效，有漏氣風險。同時，ATM不能領錢，民眾無法買東西。", choices: [{ text: "供電瓦斯監測系統", impact: "守護了居民的生命財產安全，但許多領不到錢的人因無法採買而煩惱。", cost: 50 }, { text: "恢復提款機功能", impact: "讓民眾能順利提款購物，但地下街人員面臨不可預知的瓦斯意外風險。", cost: 15 }] },
+        { title: "垃圾轉運與照明", desc: "垃圾轉運站停擺，惡臭開始擴散。同時，地下室停車場照明全滅，取車民眾很害怕。", choices: [{ text: "優先恢復轉運站", impact: "維持了城市環境整潔，但停車場內發生了嚴重的失竊案件。", cost: 20 }, { text: "點亮地下停車場", impact: "民眾取車感到安心，但市區因垃圾無法清運而充滿異味。", cost: 20 }] },
+        { title: "施工警示燈", desc: "馬路施工區的警告燈熄滅，容易發生車禍。同時，公共腳踏車系統無法借還。", choices: [{ text: "恢復施工警告燈", impact: "確保了夜間行車平安，但趕著回家的居民發現無車可借，非常不便。", cost: 25 }, { text: "供電腳踏車系統", impact: "提供了便利的移動工具，但施工區因缺乏照明發生了零星自摔意外。", cost: 10 }] },
+        { title: "消防與幼童", desc: "消防局加壓器停擺，火災會沒水救。同時，幼兒園冷氣停了，小孩因悶熱哭鬧不止。", choices: [{ text: "供電消防加壓系統", impact: "做好了萬全的救災準備，但幼兒園的孩子們因悶熱而全身長了熱疹。", cost: 40 }, { text: "供電幼兒園冷氣", impact: "孩子們恢復了笑容與活力，但消防隊只能祈禱這段時間千萬別發生大火。", cost: 20 }] },
+        { title: "農產與防災公告", desc: "農產冷藏室停電，農民心血會爛掉。同時，區公所電子公告欄無法宣導防災消息。", choices: [{ text: "恢復農產冷藏室", impact: "保護了農民的財產，但居民因為沒看到避難公告而走錯了路。", cost: 25 }, { text: "供電電子公告欄", impact: "確保了防災訊息傳遞，但農民看著變質的蔬果心痛不已。", cost: 15 }] },
+        { title: "疫苗冰箱考驗", desc: "衛生所疫苗冰箱電力不穩，疫苗會失效。同時，圖書館電子自動門鎖住，民眾受受困。", choices: [{ text: "守護疫苗冰箱", impact: "保護了昂貴的醫療資產，但圖書館民眾只能在悶熱的館內等待人力救援。", cost: 40 }, { text: "開啟圖書館門鎖", impact: "成功解救了受困民眾，但衛生所的大批疫苗因過熱必須銷毀。", cost: 20 }] },
+        { title: "廢水處理考驗", desc: "污水處理廠停機，廢水流入河川。同時，街頭監控系統停擺，治安出現死角。", choices: [{ text: "重啟污水處理", impact: "河川保持清澈，但監視器失效讓逃犯趁機穿過了市中心。", cost: 35 }, { text: "恢復街頭監視器", impact: "協助警方掌握了治安動態，但河川因廢水汙染導致大量魚群死亡。", cost: 20 }] },
+        { title: "通訊與公園照明", desc: "區公所緊急對講機無法呼叫外界。同時，大型公園夜晚漆黑，容易發生跌倒意外。", choices: [{ text: "修復區公所通訊", impact: "市長成功向外縣市求援，但公園因光線不足發生了老人家摔傷案件。", cost: 30 }, { text: "點亮公園路燈", impact: "保障了休閒民眾的安全，但對外通訊中斷，導致救援物資延遲抵達。", cost: 20 }] },
+        { title: "物資供應與充電", desc: "中央市場照明全停無法交易。同時，居民手機快沒電，需要緊急充電站聯絡家人。", choices: [{ text: "恢復中央市場電力", impact: "確保全城蔬菜水果正常供應，但手機斷訊的居民因孤立無援感到沮喪。", cost: 25 }, { text: "設立緊急充電站", impact: "讓居民找回了聯絡方式，但明早市場可能因電力不穩無法正常交易。", cost: 20 }] },
+        { title: "血庫與交通秩序", desc: "捐血中心血液保存櫃斷電。同時，紅綠燈故障讓放學公車大塞車，秩序大亂。", choices: [{ text: "供電血液保存櫃", impact: "救回了關鍵的救命血液，但放學的小朋友在悶熱的公車上坐了兩小時。", cost: 45 }, { text: "修復主要公車道信號", impact: "公車順利疏運了人潮，但捐血中心只能銷毀大批變質的血液。", cost: 25 }] },
+        { title: "身障設施功能", desc: "無障礙電梯輔助系統故障，身障者受困。同時，故障警報器大作，噪音擾民。", choices: [{ text: "修復無障礙系統", sub: "照顧行動不便的人員。", impact: "成功幫助行動不便的居民，但整條街的鄰居因尖銳的警報聲整夜失眠。", cost: 30 }, { text: "搶修警報器系統", impact: "恢復了社區的寧靜，但使用輪椅的居民受困在二樓無法下樓。", cost: 15 }] }
+    ];
+
+    function startGame() {
+        selectedScenarios = [...allScenarios].sort(() => 0.5 - Math.random()).slice(0, 3);
+        currentStepIndex = 0;
+        energy = 100;
+        history = [];
+        showPage('game-page');
+        renderStep();
+    }
+
+    function renderStep() {
+        if (currentStepIndex >= 3) {
+            showResults();
+            return;
+        }
+
+        const data = selectedScenarios[currentStepIndex];
+        document.getElementById('step-title').innerText = `🚨 第 ${currentStepIndex + 1} 關：${data.title}`;
+        document.getElementById('step-desc').innerText = data.desc;
+        
+        const container = document.getElementById('choice-container');
+        container.innerHTML = '';
+        
+        data.choices.forEach(c => {
+            const btn = document.createElement('button');
+            btn.className = 'choice-btn';
+            btn.innerHTML = `
+                <span class="choice-title">${c.text}</span>
+                <span class="choice-cost">🔋 需要電力：${c.cost} 點</span>
+            `;
+            btn.onclick = () => {
+                energy -= c.cost;
+                document.getElementById('energy-val').innerText = energy;
+                history.push({ title: data.title, choice: c.text, impact: c.impact });
+                currentStepIndex++;
+                renderStep();
+            };
+            container.appendChild(btn);
+        });
+    }
+
+    function showPage(id) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+    }
+
+    function showResults() {
+        showPage('result-page');
+        const list = document.getElementById('feedback-list');
+        let historyHTML = history.map((h, i) => `
+            <div class="result-item">
+                <strong>[${h.title}] 你選擇了：${h.choice}</strong>
+                <span class="impact-text">⚡ 決策後果：${h.impact}</span>
+            </div>
+        `).join('');
+        
+        list.innerHTML = `
+            ${historyHTML}
+            <div class="result-item" style="background:#FFFDE7; border-left:12px solid var(--primary-color)">
+                <strong>市長剩餘電力點數：${energy}%</strong>
+            </div>
+        `;
+    }
+</script>
+</body>
+</html>
